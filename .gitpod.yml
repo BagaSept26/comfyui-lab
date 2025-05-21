@@ -1,0 +1,60 @@
+image: gitpod/workspace-full-vnc
+
+tasks:
+  - name: Setup Backend & Frontend
+    init: |
+      echo "Updating submodules (from your forks)..."
+      git submodule update --init --recursive
+
+      echo "Installing ComfyUI Backend (Python) dependencies..."
+      cd backend
+      pip install --no-cache-dir -r requirements.txt
+      cd ..
+
+      echo "Installing ComfyUI_frontend (Node.js) dependencies..."
+      cd frontend
+      if [ -f "package-lock.json" ]; then
+        npm ci
+      elif [ -f "yarn.lock" ]; then
+        yarn install --frozen-lockfile
+      else
+        npm install # Sesuaikan jika frontend Anda menggunakan yarn
+      fi
+      cd ..
+
+      echo "---------------------------------------------------------------------"
+      echo "Gitpod Setup Complete. To run the application:"
+      echo "1. In a new terminal, build the frontend:"
+      echo "   cd frontend && npm run build"
+      echo ""
+      echo "2. In the same terminal (or another), copy built frontend to backend:"
+      echo "   # Ensure backend/web exists or create it if necessary"
+      echo "   mkdir -p ../backend/web"
+      echo "   rm -rf ../backend/web/*"
+      echo "   cp -r dist/* ../backend/web/" # Pastikan 'dist' adalah output build frontend
+      echo "   cd .."
+      echo ""
+      echo "3. In a new terminal, download Stable Diffusion models (if not present):"
+      echo "   mkdir -p backend/models/checkpoints"
+      echo "   echo 'Example: cd backend/models/checkpoints/ && wget -c <MODEL_URL>'"
+      echo ""
+      echo "4. In a new terminal, start the ComfyUI Backend:"
+      echo "   cd backend && python main.py --listen --port 8188"
+      echo "---------------------------------------------------------------------"
+    command: |
+      echo "Workspace ready. Follow instructions from 'Setup Backend & Frontend' task output."
+
+ports:
+  - port: 8188
+    onOpen: open-preview
+    name: ComfyUI (App)
+    description: ComfyUI Interface (Frontend served by Backend)
+    visibility: public
+
+vscode:
+  extensions:
+    - ms-python.python
+    - eamodio.gitlens
+    - dbaeumer.vscode-eslint
+    - esbenp.prettier-vscode
+    - svelte.svelte-vscode # Jika frontend menggunakan Svelte
